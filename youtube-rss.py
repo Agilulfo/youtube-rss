@@ -10,8 +10,6 @@ import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
 
-import json
-
 import datetime
 
 import xml.etree.ElementTree as ET
@@ -22,7 +20,7 @@ scopes = ["https://www.googleapis.com/auth/youtube.readonly"]
 def authorize():
     # Disable OAuthlib's HTTPS verification when running locally.
     # *DO NOT* leave this option enabled in production.
-    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+    # os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
     api_service_name = "youtube"
     api_version = "v3"
@@ -75,16 +73,6 @@ def timestamp():
     return now.strftime("%Y%m%d_%H%M%S")
 
 
-def write(dictionary):
-    with open(f"{timestamp()}.json", "w") as out:
-        json.dump(dictionary, out, indent="\t")
-
-
-def load_subscriptions():
-    with open("20250324_162518.json") as inp:
-        return json.load(inp)
-
-
 def write_opml(subscriptions):
     opml = ET.Element("opml")
     opml.set("version", "1.1")
@@ -93,6 +81,7 @@ def write_opml(subscriptions):
 
     for item in subscriptions:
         outline = ET.SubElement(body, "outline")
+        outline.set("type", "rss")
         outline.set("text", item["title"])
         outline.set("title", item["title"])
         outline.set(
@@ -111,11 +100,6 @@ def main():
 
     subscriptions = get_subscriptions(youtube)
     write_opml(subscriptions)
-
-
-def main_s():
-    subs = load_subscriptions()
-    write_opml(subs)
 
 
 if __name__ == "__main__":
