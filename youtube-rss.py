@@ -12,7 +12,9 @@ import googleapiclient.errors
 
 import json
 
-from datetime import datetime
+import datetime
+
+import xml.etree.ElementTree as ET
 
 scopes = ["https://www.googleapis.com/auth/youtube.readonly"]
 
@@ -69,7 +71,7 @@ def append_subscriptions(youtube, subscriptions, page=None):
 
 
 def timestamp():
-    now = datetime.utcnow()
+    now = datetime.datetime.now(datetime.UTC)
     return now.strftime("%Y%m%d_%H%M%S")
 
 
@@ -78,12 +80,41 @@ def write(dictionary):
         json.dump(dictionary, out, indent="\t")
 
 
-def main():
+def load_subscriptions():
+    with open("20250324_162518.json") as inp:
+        return json.load(inp)
+
+
+def write_opml(subscriptions):
+    opml = ET.Element("opml")
+    opml.set("version", "1.1")
+    ET.SubElement(opml, "head")
+    body = ET.SubElement(opml, "body")
+
+    for item in subscriptions:
+        outline = ET.SubElement(body, "outline")
+        outline.set("text", item["title"])
+        outline.set("title", item["title"])
+        outline.set(
+            "xmlUrl",
+            f"https://www.youtube.com/feeds/videos.xml?channel_id={item['id']}",
+        )
+
+    tree = ET.ElementTree(opml)
+    tree.write(f"yt_{timestamp()}.ompl", xml_declaration=True)
+
+
+def main_old():
     # get authorize client
     youtube = authorize()
 
     subscriptions = get_subscriptions(youtube)
     write(subscriptions)
+
+
+def main():
+    subs = load_subscriptions()
+    write_opml(subs)
 
 
 if __name__ == "__main__":
