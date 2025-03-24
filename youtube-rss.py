@@ -24,8 +24,9 @@ def main():
     # Get credentials and create an API client
     flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
         client_secrets_file, scopes)
-    # import ipdb; ipdb.set_trace()
-    credentials = flow.run_console()
+
+    credentials = flow.run_local_server()
+
     youtube = googleapiclient.discovery.build(
         api_service_name, api_version, credentials=credentials)
 
