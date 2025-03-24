@@ -55,7 +55,7 @@ def get_subscriptions(youtube):
 
 def append_subscriptions(youtube, subscriptions, page=None):
     request = youtube.subscriptions().list(
-        part="snippet", maxResults=50, mine=True, pageToken=page, order=alphabetical
+        part="snippet", maxResults=50, mine=True, pageToken=page, order="alphabetical"
     )
 
     response = request.execute()
@@ -101,18 +101,19 @@ def write_opml(subscriptions):
         )
 
     tree = ET.ElementTree(opml)
-    tree.write(f"yt_{timestamp()}.ompl", xml_declaration=True)
+    ET.indent(tree, space="\t")
+    tree.write(f"yt_{timestamp()}.opml", xml_declaration=True)
 
 
-def main_old():
+def main():
     # get authorize client
     youtube = authorize()
 
     subscriptions = get_subscriptions(youtube)
-    write(subscriptions)
+    write_opml(subscriptions)
 
 
-def main():
+def main_s():
     subs = load_subscriptions()
     write_opml(subs)
 
